@@ -37,8 +37,9 @@ trait PhotoApi {
     }
   }
 
-  def headers: Seq[HttpHeader] = Seq(
+  def headers: Seq[HttpHeader] =
+    Seq(
 //    RawHeader("Content-type", "application/json"),
-    RawHeader("Charset", "UTF-8")
-  ) ++ (if (token.isDefined) Seq(RawHeader("X-Auth-Token", token.get)) else Seq.empty)
+      RawHeader("Charset", "UTF-8")
+    ) ++ (if (token.isDefined) Seq(RawHeader("X-Auth-Token", token.get)) else Seq.empty)
 }
