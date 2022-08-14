@@ -1,18 +1,20 @@
 package api
 
-import akka.http.scaladsl.model.HttpHeader
+import akka.actor.typed.ActorSystem
+import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.headers.RawHeader
-import com.typesafe.config.Config
+import akka.http.scaladsl.model.{ HttpHeader, HttpRequest }
+import akka.http.scaladsl.unmarshalling.Unmarshal
+import com.typesafe.config.{ Config, ConfigFactory }
 
-import scala.concurrent.Future
+import scala.concurrent.{ ExecutionContext, Future }
 import scala.jdk.CollectionConverters._
 trait PhotoApi {
-  val config: Config
+  val config: Config = ConfigFactory.load()
   val token:  Option[String]
-  val url:    String
+  val url:    String;
   val prefix: String
-  def getPhotoUrl: Future[String]
-  def getPhoto:    Future[Array[Byte]]
+
   def getEnvVar(variable: String): String = s"$prefix.$variable".replace(".", "_")
 
   def getConfString(variable: String): Option[String] = {
@@ -42,4 +44,14 @@ trait PhotoApi {
 //    RawHeader("Content-type", "application/json"),
       RawHeader("Charset", "UTF-8")
     ) ++ (if (token.isDefined) Seq(RawHeader("X-Auth-Token", token.get)) else Seq.empty)
+
+  def getPhotoUrl: Future[String]
+  def getPhoto(implicit actorSystem: ActorSystem[Any], executionContext: ExecutionContext): Future[Array[Byte]] = {
+    val photoUrl = getPhotoUrl
+    val request  = photoUrl.flatMap(url => Http().singleRequest(HttpRequest(uri = url).withHeaders(headers)))
+    val response = request.flatMap(resp => Unmarshal(resp.entity).to[Array[Byte]])
+
+    response
+  }
+
 }

@@ -8,7 +8,8 @@ import scala.util.Random
 class ApiConnector(implicit val actorSystem: ActorSystem[Any], implicit val executionContext: ExecutionContext) {
   val apiList: List[PhotoApi] = List(
     new DogCeo(),
-    new TheDogApi()
+    new TheDogApi(),
+    new RandomWoof()
   )
 
   val random = new Random()
