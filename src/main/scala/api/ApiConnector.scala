@@ -22,4 +22,8 @@ class ApiConnector(implicit val actorSystem: ActorSystem[Any], implicit val exec
   def getPhoto: Future[Array[Byte]] = {
     randomApi.getPhoto
   }
+
+  def getPhotoByUrl(photoUrl: String): Future[Array[Byte]] = {
+    randomApi.getPhotoByUrl(photoUrl)
+  }
 }

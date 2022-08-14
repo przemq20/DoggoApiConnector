@@ -54,4 +54,13 @@ trait PhotoApi {
     response
   }
 
+  def getPhotoByUrl(
+    photoUrl:             String
+  )(implicit actorSystem: ActorSystem[Any], executionContext: ExecutionContext): Future[Array[Byte]] = {
+    val request  = Http().singleRequest(HttpRequest(uri = photoUrl).withHeaders(headers))
+    val response = request.flatMap(resp => Unmarshal(resp.entity).to[Array[Byte]])
+
+    response
+  }
+
 }

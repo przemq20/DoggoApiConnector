@@ -1,6 +1,6 @@
 package http
 
-import akka.http.scaladsl.model.{ HttpEntity, HttpResponse, MediaTypes, StatusCodes }
+import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import api.ApiConnector
@@ -25,8 +25,20 @@ class Router(api: ApiConnector) {
       pathPrefix("photo") {
         pathEndOrSingleSlash {
           get {
-            onComplete(api.getPhoto) {
-              case Success(value)     => complete(HttpResponse(StatusCodes.OK, entity = HttpEntity(MediaTypes.`image/jpeg`, value)))
+            onComplete(api.getPhotoUrl) {
+              case Success(photoUrl) =>
+                onComplete(api.getPhotoByUrl(photoUrl)) {
+                  case Success(byteArray) =>
+                    val contentType: ContentType = photoUrl.split('.').last.toLowerCase match {
+                      case "jpg" | "jpeg" => MediaTypes.`image/jpeg`
+                      case "png"          => MediaTypes.`image/png`
+                      case "mp4"          => MediaTypes.`video/mp4`
+                      case "gif"          => MediaTypes.`image/gif`
+                      case _              => MediaTypes.`image/jpeg`
+                    }
+                    complete(HttpResponse(StatusCodes.OK, entity = HttpEntity(contentType, byteArray)))
+                  case Failure(exception) => complete(exception)
+                }
               case Failure(exception) => complete(exception)
             }
           }
