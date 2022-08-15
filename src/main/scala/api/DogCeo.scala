@@ -15,8 +15,9 @@ class DogCeo(implicit val actorSystem: ActorSystem[Any], implicit val executionC
   val prefix = s"${config.getString("App.name")}.$className" //ApiConnector.DogCeo
   override val token: Option[String] = getConfString("credentials.token")
   override val url:   String         = getConfString("environment.url").get + getConfString("environment.randomImage").get
+  override val breedsSupported: Boolean = true
 
-  override def getPhotoUrl: Future[String] = {
+  override def getPhotoUrl(breed: Option[String] = None): Future[String] = {
     println(url)
     val breeds  = getConfStringList("environment.breeds")
     val request = Http().singleRequest(HttpRequest(uri = url).withHeaders(headers))

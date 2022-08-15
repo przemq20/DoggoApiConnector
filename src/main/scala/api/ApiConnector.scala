@@ -15,8 +15,24 @@ class ApiConnector(implicit val actorSystem: ActorSystem[Any], implicit val exec
   val random = new Random()
   def randomApi: PhotoApi = apiList(random.nextInt(apiList.length))
 
-  def getPhotoUrl: Future[String] = {
-    randomApi.getPhotoUrl
+  def getPhotoUrl(format: Option[String] = None, breed: Option[String] = None): Future[String] = {
+    def getPhotoUrlRec(format: String, breed: Option[String] = None): Future[String] = {
+      randomApi
+        .getPhotoUrl(breed)
+        .flatMap(
+          s =>
+            s.split('.').last match {
+              case photoFormat if photoFormat == format => Future(s)
+              case _                                    => getPhotoUrlRec(format, breed)
+            }
+        )
+    }
+
+    if (format.isDefined) {
+      getPhotoUrlRec(format.get.toLowerCase, breed)
+    } else {
+      randomApi.getPhotoUrl(breed)
+    }
   }
 
   def getPhoto: Future[Array[Byte]] = {

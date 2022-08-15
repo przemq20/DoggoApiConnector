@@ -14,32 +14,36 @@ class Router(api: ApiConnector) {
   val routes: Route =
     pathPrefix("url") {
       pathEndOrSingleSlash {
-        get {
-          onComplete(api.getPhotoUrl) {
-            case Success(value)     => complete(value)
-            case Failure(exception) => complete(exception)
+        parameters("format".optional, "breed".optional) { (format, breed) =>
+          get {
+            onComplete(api.getPhotoUrl(format, breed)) {
+              case Success(value) => complete(value)
+              case Failure(exception) => complete(exception)
+            }
           }
         }
       }
     } ~
       pathPrefix("photo") {
         pathEndOrSingleSlash {
-          get {
-            onComplete(api.getPhotoUrl) {
-              case Success(photoUrl) =>
-                onComplete(api.getPhotoByUrl(photoUrl)) {
-                  case Success(byteArray) =>
-                    val contentType: ContentType = photoUrl.split('.').last.toLowerCase match {
-                      case "jpg" | "jpeg" => MediaTypes.`image/jpeg`
-                      case "png"          => MediaTypes.`image/png`
-                      case "mp4"          => MediaTypes.`video/mp4`
-                      case "gif"          => MediaTypes.`image/gif`
-                      case _              => MediaTypes.`image/jpeg`
-                    }
-                    complete(HttpResponse(StatusCodes.OK, entity = HttpEntity(contentType, byteArray)))
-                  case Failure(exception) => complete(exception)
-                }
-              case Failure(exception) => complete(exception)
+          parameters("format".optional, "breed".optional) { (format, breed) =>
+            get {
+              onComplete(api.getPhotoUrl(format, breed)) {
+                case Success(photoUrl) =>
+                  onComplete(api.getPhotoByUrl(photoUrl)) {
+                    case Success(byteArray) =>
+                      val contentType: ContentType = photoUrl.split('.').last.toLowerCase match {
+                        case "jpg" | "jpeg" => MediaTypes.`image/jpeg`
+                        case "png" => MediaTypes.`image/png`
+                        case "mp4" => MediaTypes.`video/mp4`
+                        case "gif" => MediaTypes.`image/gif`
+                        case _ => MediaTypes.`image/jpeg`
+                      }
+                      complete(HttpResponse(StatusCodes.OK, entity = HttpEntity(contentType, byteArray)))
+                    case Failure(exception) => complete(exception)
+                  }
+                case Failure(exception) => complete(exception)
+              }
             }
           }
         }

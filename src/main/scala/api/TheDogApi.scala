@@ -15,8 +15,9 @@ class TheDogApi(implicit val actorSystem: ActorSystem[Any], implicit val executi
   val prefix = s"${config.getString("App.name")}.$className" //ApiConnector.TheDogApi
   override val token: Option[String] = getConfString("credentials.token")
   override val url:   String         = getConfString("environment.url").get
+  override val breedsSupported: Boolean = true
 
-  override def getPhotoUrl: Future[String] = {
+  override def getPhotoUrl(breed: Option[String] = None): Future[String] = {
     val request = Http().singleRequest(HttpRequest(uri = url).withHeaders(headers))
     val response = request
       .flatMap(resp => Unmarshal(resp.entity).to[String])

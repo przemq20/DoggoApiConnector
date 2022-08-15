@@ -11,9 +11,10 @@ import scala.concurrent.{ ExecutionContext, Future }
 import scala.jdk.CollectionConverters._
 trait PhotoApi {
   val config: Config = ConfigFactory.load()
-  val token:  Option[String]
-  val url:    String;
-  val prefix: String
+  val token:           Option[String]
+  val url:             String
+  val prefix:          String
+  val breedsSupported: Boolean = false
 
   def getEnvVar(variable: String): String = s"$prefix.$variable".replace(".", "_")
 
@@ -45,9 +46,9 @@ trait PhotoApi {
       RawHeader("Charset", "UTF-8")
     ) ++ (if (token.isDefined) Seq(RawHeader("X-Auth-Token", token.get)) else Seq.empty)
 
-  def getPhotoUrl: Future[String]
+  def getPhotoUrl(breed: Option[String] = None): Future[String]
   def getPhoto(implicit actorSystem: ActorSystem[Any], executionContext: ExecutionContext): Future[Array[Byte]] = {
-    val photoUrl = getPhotoUrl
+    val photoUrl = getPhotoUrl()
     val request  = photoUrl.flatMap(url => Http().singleRequest(HttpRequest(uri = url).withHeaders(headers)))
     val response = request.flatMap(resp => Unmarshal(resp.entity).to[Array[Byte]])
 
