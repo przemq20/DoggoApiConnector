@@ -18,7 +18,7 @@ class DogCeo(implicit val actorSystem: ActorSystem[Any], implicit val executionC
 
   override def getPhotoUrl: Future[String] = {
     println(url)
-    val breeds  = getConfigStringList("environment.breeds")
+    val breeds  = getConfStringList("environment.breeds")
     val request = Http().singleRequest(HttpRequest(uri = url).withHeaders(headers))
     val response = request
       .flatMap(resp => Unmarshal(resp.entity).to[String])

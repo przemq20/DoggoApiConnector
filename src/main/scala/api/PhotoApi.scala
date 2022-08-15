@@ -28,7 +28,7 @@ trait PhotoApi {
     }
   }
 
-  def getConfigStringList(variable: String): List[String] = {
+  def getConfStringList(variable: String): List[String] = {
     val envVar = getEnvVar(variable)
     if (System.getenv(envVar) == null) {
       if (config.getConfig(s"$prefix").hasPath(s"$variable"))
