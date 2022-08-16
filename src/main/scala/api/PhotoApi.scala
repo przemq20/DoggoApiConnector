@@ -46,7 +46,7 @@ trait PhotoApi {
       RawHeader("Charset", "UTF-8")
     ) ++ (if (token.isDefined) Seq(RawHeader("X-Auth-Token", token.get)) else Seq.empty)
 
-  def getPhotoUrl(breed: Option[String] = None): Future[String]
+  def getPhotoUrl(breedOpt: Option[String] = None): Future[String]
   def getPhoto(implicit actorSystem: ActorSystem[Any], executionContext: ExecutionContext): Future[Array[Byte]] = {
     val photoUrl = getPhotoUrl()
     val request  = photoUrl.flatMap(url => Http().singleRequest(HttpRequest(uri = url).withHeaders(headers)))

@@ -17,7 +17,7 @@ class TheDogApi(implicit val actorSystem: ActorSystem[Any], implicit val executi
   override val url:   String         = getConfString("environment.url").get
   override val breedsSupported: Boolean = true
 
-  override def getPhotoUrl(breed: Option[String] = None): Future[String] = {
+  override def getPhotoUrl(breedOpt: Option[String] = None): Future[String] = {
     val request = Http().singleRequest(HttpRequest(uri = url).withHeaders(headers))
     val response = request
       .flatMap(resp => Unmarshal(resp.entity).to[String])
