@@ -10,8 +10,8 @@ class ApiConnector(implicit val actorSystem: ActorSystem[Any], implicit val exec
   val random = new Random()
   val apiList: List[PhotoApi] = List(
     new DogCeo(),
-    new TheDogApi(),
-    new RandomWoof()
+//    new TheDogApi(),
+//    new RandomWoof()
   )
 
   def randomApi(breedSupport: Boolean = false): PhotoApi = {
