@@ -7,6 +7,8 @@ lazy val root = (project in file("."))
     name := "DoggoApiConnector"
   )
 
+enablePlugins(JavaAppPackaging)
+
 
 val AkkaVersion = "2.6.8"
 val AkkaHttpVersion = "10.2.4"
