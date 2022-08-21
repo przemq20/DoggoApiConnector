@@ -7,18 +7,25 @@ import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.Random
 
 class ApiConnector(implicit val actorSystem: ActorSystem[Any], implicit val executionContext: ExecutionContext) {
-  val random = new Random()
+  val random     = new Random()
+  val dogCeo     = new DogCeo()
+  val theDogApi  = new TheDogApi()
+  val randomWoof = new RandomWoof()
+
   val apiList: List[PhotoApi] = List(
-    new DogCeo(),
-//    new TheDogApi(),
-//    new RandomWoof()
+    dogCeo,
+    theDogApi,
+    randomWoof
   )
 
-  def randomApi(breedSupport: Boolean = false): PhotoApi = {
-    if (breedSupport)
-      apiList(random.nextInt(apiList.length))
-    else
-      randomApiWithBreedsSupport
+  def getApi(breedSupport: Boolean = false, api: Option[PhotoApi] = None): PhotoApi = {
+    if (api.isDefined) api.get
+    else {
+      if (breedSupport)
+        apiList(random.nextInt(apiList.length))
+      else
+        randomApiWithBreedsSupport
+    }
   }
 
   @tailrec
@@ -31,9 +38,14 @@ class ApiConnector(implicit val actorSystem: ActorSystem[Any], implicit val exec
       randomApiWithBreedsSupport
   }
 
-  def getPhotoUrl(format: Option[String] = None, breed: Option[String] = None): Future[String] = {
-    def getPhotoUrlRec(format: String, breed: Option[String] = None): Future[String] = {
-      randomApi(breed.isDefined)
+  def getPhotoUrl(
+    format:       Option[String] = None,
+    breed:        Option[String] = None,
+    preferredApi: Option[String] = None
+  ): Future[String] = {
+
+    def getPhotoUrlRec(format: String, breed: Option[String] = None, api: Option[PhotoApi] = None): Future[String] = {
+      getApi(breed.isDefined, api)
         .getPhotoUrl(breed)
         .flatMap(
           s =>
@@ -44,18 +56,28 @@ class ApiConnector(implicit val actorSystem: ActorSystem[Any], implicit val exec
         )
     }
 
-    if (format.isDefined) {
-      getPhotoUrlRec(format.get.toLowerCase, breed)
-    } else {
-      randomApi(breed.isDefined).getPhotoUrl(breed)
+    def getPhotoWithFormat(api: Option[PhotoApi]): Future[String] = {
+      if (format.isDefined) {
+        getPhotoUrlRec(format.get.toLowerCase, breed, api)
+      } else {
+
+        getApi(breed.isDefined, api).getPhotoUrl(breed)
+      }
+    }
+
+    preferredApi match {
+      case Some("TheDogApi") | Some("thedogapi") =>
+        getPhotoWithFormat(Some(theDogApi))
+      case Some("DogCeo") | Some("dogceo") =>
+        getPhotoWithFormat(Some(dogCeo))
+      case Some("RandomWoof") | Some("randomwoof") =>
+        getPhotoWithFormat(Some(randomWoof))
+      case _ =>
+        getPhotoWithFormat(None)
     }
   }
 
-  def getPhoto: Future[Array[Byte]] = {
-    randomApi().getPhoto
-  }
-
   def getPhotoByUrl(photoUrl: String): Future[Array[Byte]] = {
-    randomApi().getPhotoByUrl(photoUrl)
+    getApi().getPhotoByUrl(photoUrl)
   }
 }

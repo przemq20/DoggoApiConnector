@@ -14,9 +14,9 @@ class Router(api: ApiConnector) {
   val routes: Route =
     pathPrefix("url") {
       pathEndOrSingleSlash {
-        parameters("format".optional, "breed".optional) { (format, breed) =>
+        parameters("format".optional, "breed".optional, "preferredApi".optional) { (format, breed, preferredApi) =>
           get {
-            onComplete(api.getPhotoUrl(format, breed)) {
+            onComplete(api.getPhotoUrl(format, breed, preferredApi)) {
               case Success(value) => complete(value)
               case Failure(exception) => complete(exception)
             }
@@ -26,9 +26,9 @@ class Router(api: ApiConnector) {
     } ~
       pathPrefix("photo") {
         pathEndOrSingleSlash {
-          parameters("format".optional, "breed".optional) { (format, breed) =>
+          parameters("format".optional, "breed".optional, "preferredApi".optional) { (format, breed, preferredApi) =>
             get {
-              onComplete(api.getPhotoUrl(format, breed)) {
+              onComplete(api.getPhotoUrl(format, breed, preferredApi)) {
                 case Success(photoUrl) =>
                   onComplete(api.getPhotoByUrl(photoUrl)) {
                     case Success(byteArray) =>
