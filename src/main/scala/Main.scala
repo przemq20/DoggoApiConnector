@@ -12,7 +12,8 @@ object Main extends App {
 
   val api = new ApiConnector()
   val router = new Router(api)
-  val port = if (System.getenv("PORT") != null) System.getenv("PORT").toInt else 8080
+  val host = "0.0.0.0"
+  val port: Int = sys.env.getOrElse("PORT", "8080").toInt
 
-  val serverSource = Http().newServerAt("localhost", port).bind(router.routes)
+  val serverSource = Http().newServerAt(host, port).bind(router.routes)
 }
