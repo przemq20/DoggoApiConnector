@@ -6,7 +6,7 @@ import akka.http.scaladsl.server.Route
 import api.ApiConnector
 
 import scala.concurrent.duration._
-import scala.util.{ Failure, Success }
+import scala.util.{Failure, Success}
 
 class Router(api: ApiConnector) {
   implicit val timeout: FiniteDuration = 5.seconds
@@ -47,5 +47,8 @@ class Router(api: ApiConnector) {
             }
           }
         }
+      } ~
+      pathEndOrSingleSlash {
+        complete("Hello")
       }
 }
